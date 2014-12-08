@@ -33,6 +33,10 @@
   ;;(sente-transit/get-flexi-packer :edn) ; Experimental, needs Transit deps
   )
 
+#_(go (while true
+      (println "Got" (<! ch-chsk))
+      ))
+
 (defroutes routes
   (GET  "/chsk" req (ring-ajax-get-or-ws-handshake req))
   (POST "/chsk" req (ring-ajax-post                req))
@@ -56,14 +60,27 @@
       (logf "Unhandled event: %s" event)
       (when ?reply-fn
         (?reply-fn {:umatched-event-as-echoed-from-from-server event}))))
+  (defmethod event-msg-handler :reagent-test.handler/bleh
+    [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+    (let [session (:session ring-req)
+          uid     (:uid     session)]
+      (logf "Yipee.  Got" ev-msg)
+      (when ?reply-fn
+        (?reply-fn {:umatched-event-as-echoed-from-from-server event}))))
 
   ;; Add your (defmethod event-msg-handler <event-id> [ev-msg] <body>)s here...
   )
 
+(defonce router_ (atom nil))
+(defn  stop-router! [] (when-let [stop-f @router_] (stop-f)))
+(defn start-router! []
+  (stop-router!)
+  (reset! router_ (sente/start-chsk-router! ch-chsk event-msg-handler*)))
 
 
 (def app
   (let [handler (wrap-defaults routes site-defaults)]
+    (start-router!)
     (if (env :dev?) (wrap-exceptions handler) handler)))
 
 (defn in-dev? [& args] true)

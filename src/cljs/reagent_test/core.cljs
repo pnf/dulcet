@@ -1,20 +1,21 @@
 (ns reagent-test.core
   (:require-macros
    [cljs.core.async.macros :as asyncm :refer (go go-loop)])
-  
-    (:require [reagent.core :as reagent :refer [atom]]
-              [secretary.core :as secretary :include-macros true]
-              [clojure.string  :as str]
-              [cljs.core.async :as async  :refer (<! >! chan timeout)]
-              [goog.events :as events]
-              [goog.history.EventType :as EventType]
-              [taoensso.sente  :as sente :refer (cb-success?)]
-              [taoensso.encore :as encore :refer (logf)]
+  (:require [reagent.core :as reagent :refer [atom]]
+            [secretary.core :as secretary :include-macros true]
+            [clojure.string  :as str]
+            [cljs.core.async :as async  :refer (<! >! chan timeout)]
+            [goog.events :as events]
+            [goog.history.EventType :as EventType]
+            [taoensso.sente  :as sente]
+            [taoensso.encore :as encore :refer (logf)]
+            
+            ;; Optional, for Transit encoding:
+            ;;[taoensso.sente.packers.transit :as sente-transit]
+            )
 
-              ;; Optional, for Transit encoding:
-              ;[taoensso.sente.packers.transit :as sente-transit]
-              )
-    (:import goog.History))
+
+  (:import goog.History))
 
 
 ;;; Sente
@@ -60,6 +61,13 @@
   )
 
 
+(def router_ (atom nil))
+(defn  stop-router! [] (when-let [stop-f @router_] (stop-f)))
+(defn start-router! []
+  (stop-router!)
+  (reset! router_ (sente/start-chsk-router! ch-chsk event-msg-handler*)))
+
+
 ;; -------------------------
 ;; State
 (defonce app-state (atom {:text "Hello, this is: " :count 0}))
@@ -76,12 +84,17 @@
 (defmulti page identity)
 
 (defmethod page :page1 [_]
-  [:div [:h2 (get-state :count) (get-state :text) "Page 1"]
+  [:div [:h2 (get-state :count) ": "(get-state :text) "Page 1"]
    [:div [:a {:href "#/page2"} "go to page 2"]]])
 
 (defmethod page :page2 [_]
   [:div [:h2 (get-state :count) (get-state :text) "Page 2"]
-   [:div [:a {:href "#/"} "go to page 1"]]])
+   [:div [:a {:href "#/"} "go to page 1"]]
+   [:div [:input {:type "text" :value "Type something."
+                  :on-change #(do
+                                (println "howdy")
+                                (chsk-send! [:reagent-test.handler/bleh {:value  (-> % .-target .-value)}]))}]]
+   ])
 
 (defmethod page :default [_]
   [:div "Invalid/Unknown route"])
@@ -105,14 +118,15 @@
 ;; fiddles
 (go
   (while true
-    (<! (timeout 1000))
+    (<! (timeout 10000))
     (swap! app-state update-in [:count] inc)
     )  )
 
   ;; -------------------------
   ;; Initialize app
 (defn init! []
-    (reagent/render-component [main-page] (.getElementById js/document "app")))
+  (start-router!)
+  (reagent/render-component [main-page] (.getElementById js/document "app")))
 
 ;; -------------------------
 ;; History
