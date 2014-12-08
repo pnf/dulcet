@@ -15,7 +15,7 @@
                  [weasel "0.4.0-SNAPSHOT"]
                  [http-kit "2.1.18"] ;; !!!
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
-                 [com.taoensso/sente "0.14.1"]
+                 [com.taoensso/sente "1.2.0"]
                  [com.taoensso/timbre "3.3.1"]
                  [com.cognitect/transit-clj  "0.8.259"]
                  [com.cognitect/transit-cljs "0.8.194"]
@@ -76,7 +76,7 @@
                    :figwheel {:http-server-root "public"
                               :server-port 3449
                               :css-dirs ["resources/public/css"]
-                              :ring-handler reagent-test/handler
+                              :ring-handler reagent-test.handler/app
                               }
 
                    :env {:dev? true}
