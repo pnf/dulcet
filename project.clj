@@ -1,4 +1,4 @@
-(defproject reagent-test "0.1.0-SNAPSHOT"
+(defproject dulcet "0.1.0-SNAPSHOT"
   :description "FIXME: write description"
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
@@ -35,13 +35,13 @@
             [lein-ring "0.8.13"]
             [lein-asset-minifier "0.2.0"]]
 
-  :main reagent-test.handler
+  :main dulcet.handler
 
-  :ring {:handler reagent-test.handler/app}
+  :ring {:handler dulcet.handler/app}
 
   :min-lein-version "2.5.0"
 
-  :uberjar-name "reagent-test.jar"
+  :uberjar-name "dulcet.jar"
 
   :minify-assets
   {:assets
@@ -62,7 +62,7 @@
   {"build-once" ["do" "cljx" "once," "cljsbuild" "once"]
    "start-dev"  ["repl" ":headless"]}
 
-  :profiles {:dev {:repl-options {:init-ns reagent-test.handler
+  :profiles {:dev {:repl-options {:init-ns dulcet.handler
                                   :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
 
                    :dependencies [[ring-mock "0.1.5"]
@@ -77,7 +77,7 @@
                    :figwheel {:http-server-root "public"
                               :server-port 3449
                               :css-dirs ["resources/public/css"]
-                              :ring-handler reagent-test.handler/app
+                              :ring-handler dulcet.handler/app
                               }
 
                    :env {:dev? true}

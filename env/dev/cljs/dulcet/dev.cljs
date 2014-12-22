@@ -1,5 +1,5 @@
-(ns reagent-test.dev
-  (:require [reagent-test.core :as core]
+(ns dulcet.dev
+  (:require [dulcet.core :as core]
             [figwheel.client :as figwheel :include-macros true]
             [weasel.repl :as weasel]
             [reagent.core :as r]))

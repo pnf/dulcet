@@ -1,6 +1,6 @@
-(ns reagent-test.handler
+(ns dulcet.handler
   (:use [org.httpkit.server :only [run-server]])
-  (:require [reagent-test.dev :refer [browser-repl start-figwheel]]
+  (:require [dulcet.dev :refer [browser-repl start-figwheel]]
             [compojure.core :refer [GET POST defroutes]]
             [compojure.route :refer [not-found resources]]
             [compojure.handler]
@@ -60,7 +60,7 @@
       (logf "Unhandled event: %s" event)
       (when ?reply-fn
         (?reply-fn {:umatched-event-as-echoed-from-from-server event}))))
-  (defmethod event-msg-handler :reagent-test.handler/bleh
+  (defmethod event-msg-handler :dulcet.handler/bleh
     [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
     (let [session (:session ring-req)
           uid     (:uid     session)]

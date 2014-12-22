@@ -1,4 +1,4 @@
-(ns reagent-test.core
+(ns dulcet.core
   (:require-macros
    [cljs.core.async.macros :as asyncm :refer (go go-loop)])
   (:require [reagent.core :as reagent :refer [atom]]
@@ -86,14 +86,14 @@
 
 
 (defn send-callback [kw]
-  (fn [x]( chsk-send! [:reagent-test.handler/bleh {kw x}])  ))
+  (fn [x]( chsk-send! [:dulcet.handler/bleh {kw x}])  ))
 
 (defn send-loc-callback [loc]
   (let [coords (.-coords loc)
         latitude (.-latitude coords)
         longitude (.-longitude coords )
         location  {:location {:latitude latitude :longitude longitude}}]
-    (chsk-send! [:reagent-test.handler/bleh {:location location}]))  )
+    (chsk-send! [:dulcet.handler/bleh {:location location}]))  )
 
 (defmethod page :page1 [_]
   (navigator.geolocation.getAccurateCurrentPosition send-local-callback
@@ -117,7 +117,7 @@
                       :on-change #(let [v (-> % .-target .-value)]
                                     (println "howdy" v)
                                     (put! :input v)
-                                    (chsk-send! [:reagent-test.handler/bleh {:value  v}]))}]]
+                                    (chsk-send! [:dulcet.handler/bleh {:value  v}]))}]]
        ])))
 
 (defmethod page :default [_]
