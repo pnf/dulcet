@@ -64,7 +64,7 @@
     [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
     (let [session (:session ring-req)
           uid     (:uid     session)]
-      (logf "Yipee.  Got" ev-msg)
+      (logf "Yipee.  Got %s" ev-msg)
       (when ?reply-fn
         (?reply-fn {:umatched-event-as-echoed-from-from-server event}))))
 
@@ -83,13 +83,21 @@
     (start-router!)
     (if (env :dev?) (wrap-exceptions handler) handler)))
 
+
+;; This stuff doesn't get used by figwheel.
 (defn in-dev? [& args] true)
-
 (def port 3000)
-
-(defn -main [& args]
+(defonce kill-server (atom nil))
+(defonce server-args (atom nil))
+(defn start-server [& args]
   (let [handler (if(in-dev? args)
                   (reload/wrap-reload (compojure.handler/site #'routes))
                   (compojure.handler/site routes))]
     (println "Starting server at port" port)
-    (run-server handler {:port port}))  )
+    (reset! server-args args)
+    (reset! kill-server (run-server handler {:port port})))  )
+(defn restart-server []
+  (@kill-server)
+  (start-server @server-args))
+(defn -main [& args]
+  (start-server args))

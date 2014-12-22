@@ -9,9 +9,10 @@
             [goog.history.EventType :as EventType]
             [taoensso.sente  :as sente]
             [taoensso.encore :as encore :refer (logf)]
-            
             ;; Optional, for Transit encoding:
             ;;[taoensso.sente.packers.transit :as sente-transit]
+            ;;[keithwhor.audiosynth :as audio]
+            ;;[gwilson.geo :as geo]
             )
 
 
@@ -83,21 +84,49 @@
 
 (defmulti page identity)
 
+
+(defn send-callback [kw]
+  (fn [x]( chsk-send! [:reagent-test.handler/bleh {kw x}])  ))
+
+(defn send-loc-callback [loc]
+  (let [coords (.-coords loc)
+        latitude (.-latitude coords)
+        longitude (.-longitude coords )
+        location  {:location {:latitude latitude :longitude longitude}}]
+    (chsk-send! [:reagent-test.handler/bleh {:location location}]))  )
+
 (defmethod page :page1 [_]
+  (navigator.geolocation.getAccurateCurrentPosition send-local-callback
+                                                    (send-callback :error)
+                                                    send-loc-callback
+                                                    send-loc-callback
+                                                    send-loc-callback
+                                                    {:desiredAccuracy 20, :maxWait 15000})
   [:div [:h2 (get-state :count) ": "(get-state :text) "Page 1"]
    [:div [:a {:href "#/page2"} "go to page 2"]]])
 
 (defmethod page :page2 [_]
-  [:div [:h2 (get-state :count) (get-state :text) "Page 2"]
-   [:div [:a {:href "#/"} "go to page 1"]]
-   [:div [:input {:type "text" :value "Type something."
-                  :on-change #(do
-                                (println "howdy")
-                                (chsk-send! [:reagent-test.handler/bleh {:value  (-> % .-target .-value)}]))}]]
-   ])
+  (let [piano (. js/Synth (createInstrument "piano"))]
+    (fn []
+      (println "Hey let's play" piano)
+      (. piano (play "C" 4 2))
+      (println "Hey let's play" piano)
+      [:div [:h2 (get-state :count) (get-state :text "Type something.") "Page 2"]
+       [:div [:a {:href "#/"} "go to page 1"]]
+       [:div [:input {:type "text" :value (get-state :input)
+                      :on-change #(let [v (-> % .-target .-value)]
+                                    (println "howdy" v)
+                                    (put! :input v)
+                                    (chsk-send! [:reagent-test.handler/bleh {:value  v}]))}]]
+       ])))
 
 (defmethod page :default [_]
   [:div "Invalid/Unknown route"])
+
+
+
+
+
 
 (defn main-page []
   [:div [page (get-state :current-page)]])

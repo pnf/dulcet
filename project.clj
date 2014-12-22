@@ -52,6 +52,7 @@
                                         :output-dir    "resources/public/js/out"
                                         :source-map    "resources/public/js/out.js.map"
                                         :externs       ["react/externs/react.js"]
+                                        ;;:foreign-libs     [{:file "resources/public/lib/geo.js" :provides ["gwilson.geo"]}                                                {:file "resources/public/lib/audiosynth.js" :provides ["keithwhor.audiosynth"]}]
                                         :optimizations :none
                                         :pretty-print  true}}}}
 
